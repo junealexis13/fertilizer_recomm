@@ -12,10 +12,10 @@ def sidebar():
                 N = st.selectbox("Select Fertilizer for N", ["UREA_PRILLED", "UREA_GRANULAR", "AMMOSUL", "COMPLETE"], key="N_default")
                 st.session_state.fert_N = Fertilizers[N].value
             with st.container(border=True, horizontal=True, horizontal_alignment='left'):
-                P = st.selectbox("Select Fertilizer for P", ["DIAMMONIUM_PHOSPHATE", "AMMOPHOS", "COMPLETE"], key="P_default")
+                P = st.selectbox("Select Fertilizer for P", ["DIAMMONIUM_PHOSPHATE", "AMMOPHOS"], key="P_default")
                 st.session_state.fert_P = Fertilizers[P].value
             with st.container(border=True, horizontal=True, horizontal_alignment='left'):
-                K = st.selectbox("Select Fertilizer for K", ["MURIATE_OF_POTASH", "COMPLETE"], key="K_default")
+                K = st.selectbox("Select Fertilizer for K", ["MURIATE_OF_POTASH"], key="K_default")
                 st.session_state.fert_K = Fertilizers[K].value
 
             st.caption('Choices limited to available fertilizers at DA-FPA market watch')
