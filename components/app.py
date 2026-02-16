@@ -57,3 +57,24 @@ def app():
                 with st.container():
                     st.markdown('#### Potassium')
                     st.write(f'You need to apply :green[{round(recoms['K'], 2)} kg], or :blue[{round(recoms['K']/50, 2)} bag/s] of :orange[{st.session_state.fert_K['N']}-{st.session_state.fert_K['P']}-{st.session_state.fert_K['K']}]')
+
+                # Check for oversupply
+                if 'oversupply' in recoms:
+                    oversupply = recoms['oversupply']
+                    oversupply_msg = []
+                    oversupply_recommendation = []
+                    if oversupply['N'] > 0:
+                        oversupply_msg.append(f"Nitrogen (+{round(oversupply['N'], 2)} kg)")
+                        oversupply_recommendation.append(f"**Nitrogen** (Consider changing the type of fertilizer for Nitrogen to avoid oversupply.)")
+                    if oversupply['P'] > 0:
+                        oversupply_msg.append(f"Phosphorus (+{round(oversupply['P'], 2)} kg)")
+                        oversupply_recommendation.append(f"**Phosphorus** (Consider changing the type of fertilizer for Phosphorus to avoid oversupply.)")
+                    if oversupply['K'] > 0:
+                        oversupply_msg.append(f"Potassium (+{round(oversupply['K'], 2)} kg)")
+                        oversupply_recommendation.append(f"**Potassium** (Consider changing the type of fertilizer for Potassium to avoid oversupply.)")
+                    
+                    if oversupply_msg:
+                        st.warning(f"Potential oversupply detected: {', '.join(oversupply_msg)}")
+                        st.error(f"Recommendation")
+                        for i in oversupply_recommendation:
+                            st.error(i)

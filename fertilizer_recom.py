@@ -146,17 +146,64 @@ class FertilizerRecommendation:
         solution = self.solve_linear_system(A, b)
 
         if solution is None:
-            #fallback here
-            return {'N': 0, 'P': 0, 'K': 0}
+            # Fallback: step-down calculation
+            # 1. Start with P (often the limiting factor in mixed fertilizers)
+            req_p = self.fertilizer_required['P']
+            if c1[1] > 0:
+                p_amount = (req_p / c1[1])
+            else:
+                p_amount = 0
+            
+            # Deduct supplied nutrients from P choice
+            rem_n = self.fertilizer_required['N'] - (p_amount * c1[0])
+            rem_k = self.fertilizer_required['K'] - (p_amount * c1[2])
+
+            # 2. Add K to meet remaining K requirement
+            if c2[2] > 0:
+                k_amount = max(0, rem_k) / c2[2]
+            else:
+                k_amount = 0
+            
+            # Deduct supplied nutrients from K choice
+            rem_n -= (k_amount * c2[0])
+
+            # 3. Add N to meet remaining N requirement
+            if c0[0] > 0:
+                n_amount = max(0, rem_n) / c0[0]
+            else:
+                n_amount = 0
+            
+            # Apply area
+            n_amount *= self.area
+            p_amount *= self.area
+            k_amount *= self.area
+        else:
+            n_amount = max(0, solution[0]) * self.area
+            p_amount = max(0, solution[1]) * self.area
+            k_amount = max(0, solution[2]) * self.area
+
+        # Calculate supplied nutrients
+        supplied_n = (n_amount * c0[0] + p_amount * c1[0] + k_amount * c2[0])
+        supplied_p = (n_amount * c0[1] + p_amount * c1[1] + k_amount * c2[1])
+        supplied_k = (n_amount * c0[2] + p_amount * c1[2] + k_amount * c2[2])
+
+        # Calculate oversupply
+        oversupply_n = max(0, supplied_n - self.fertilizer_required['N'])
+        oversupply_p = max(0, supplied_p - self.fertilizer_required['P'])
+        oversupply_k = max(0, supplied_k - self.fertilizer_required['K'])
         
-        n_amount = max(0, solution[0]) * self.area
-        p_amount = max(0, solution[1]) * self.area
-        k_amount = max(0, solution[2]) * self.area
+        # Determine if oversupply is significant (e.g. > 0.1 kg)
+        oversupply_data = {
+            'N': oversupply_n if oversupply_n > 0.1 else 0,
+            'P': oversupply_p if oversupply_p > 0.1 else 0,
+            'K': oversupply_k if oversupply_k > 0.1 else 0
+        }
 
         return {
             'N': n_amount,
             'P': p_amount,
-            'K': k_amount
+            'K': k_amount,
+            'oversupply': oversupply_data
         }
 
 if __name__ == "__main__":
